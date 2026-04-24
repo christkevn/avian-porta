@@ -6,9 +6,11 @@
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Manajemen Program</h5>
-                <a href="{{ url('/master/programs/create') }}" class="btn btn-primary w-200">
-                    <i class="ri ri-add-line"></i> Tambah Program
-                </a>
+                <small class="text-body-secondary float-end">
+                    <a href="{{ url('/master/programs/create') }}" class="btn btn-primary w-200">
+                        <i class="ri ri-add-line"></i> Tambah Program
+                    </a>
+                </small>
             </div>
             <div class="card-datatable">
                 @include('partials.notification')

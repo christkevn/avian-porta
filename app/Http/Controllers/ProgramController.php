@@ -21,8 +21,8 @@ class ProgramController extends Controller
                 return formatDate($row->created_at, 'd M Y H:i');
             })
             ->addColumn('action', function ($row) {
-                $edit   = '<a href="' . url("master/programs/{$row->id}/edit") . '" class="btn btn-sm btn-warning me-1"><i class="ri ri-edit-line"></i> Edit</a>';
-                $delete = '<button class="btn btn-sm btn-danger btn-delete" data-id="' . $row->id . '" data-url="' . url("master/programs/{$row->id}") . '"><i class="ri ri-delete-bin-line"></i> Hapus</button>';
+                $edit   = '<a href="' . url("master/programs/{$row->id}/edit") . '" class="btn btn-sm btn-warning me-1" title="Edit"><i class="ri ri-edit-line"></i></a>';
+                $delete = '<button class="btn btn-sm btn-danger btn-delete" title="Hapus" data-id="' . $row->id . '" data-url="' . url("master/programs/{$row->id}") . '"><i class="ri ri-delete-bin-line"></i></button>';
                 return $edit . $delete;
             })
             ->rawColumns(['action'])

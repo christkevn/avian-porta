@@ -41,9 +41,14 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end gap-2 mt-2">
-                    <button type="submit" class="btn btn-primary w-200">Simpan</button>
-                    <a href="{{ url('/master/menus') }}" class="btn btn-warning w-200">Batal</a>
+                <div class="row justify-content-end">
+                    <div class="col-sm-10">
+                        <div class="d-flex justify-content-end flex-wrap flex-sm-nowrap gap-2">
+                            <button type="submit" class="btn btn-primary w-100 w-200">Simpan</button>
+                            <a href="{{ url('/master/menus') }}" type="button"
+                                class="btn btn-warning w-100 w-200">Batal</a>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

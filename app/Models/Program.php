@@ -11,6 +11,7 @@ class Program extends Model
     protected $fillable = [
         'name',
         'url',
+        'created_at',
     ];
 
     public $timestamps = false;
