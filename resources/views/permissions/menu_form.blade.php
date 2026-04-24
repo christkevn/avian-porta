@@ -13,102 +13,113 @@
         <div class="card-body">
             @include('partials.error')
 
-            <form method="POST" action="{{ url('master/user-menu-permissions/' . $user->id) }}" id="permissionForm">
-                @csrf
-                @method('PUT')
+            @if ($programs->isEmpty())
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    User ini belum memiliki akses ke program apapun.
+                    Silakan atur akses program terlebih dahulu di
+                    <a href="{{ url('/master/user-program-permissions/edit/' . $user->id) }}" class="alert-link">
+                        halaman User Program Permission
+                    </a>.
+                </div>
+            @else
+                <form method="POST" action="{{ url('master/user-menu-permissions/' . $user->id) }}" id="permissionForm">
+                    @csrf
+                    @method('PUT')
 
-                <ul class="nav nav-tabs mb-3" id="programTab" role="tablist">
-                    @foreach ($programs as $index => $program)
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link {{ $index == 0 ? 'active' : '' }}" data-bs-toggle="tab"
-                                data-bs-target="#program{{ $program->id }}" type="button" role="tab">
-                                {{ $program->name }}
-                            </button>
-                        </li>
-                    @endforeach
-                </ul>
+                    <ul class="nav nav-tabs mb-3" id="programTab" role="tablist">
+                        @foreach ($programs as $index => $program)
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link {{ $index == 0 ? 'active' : '' }}" data-bs-toggle="tab"
+                                    data-bs-target="#program{{ $program->id }}" type="button" role="tab">
+                                    {{ $program->name }}
+                                </button>
+                            </li>
+                        @endforeach
+                    </ul>
 
-                <div class="tab-content">
-                    @foreach ($programs as $index => $program)
-                        <div class="tab-pane fade {{ $index == 0 ? 'show active' : '' }}" id="program{{ $program->id }}"
-                            role="tabpanel">
+                    <div class="tab-content">
+                        @foreach ($programs as $index => $program)
+                            <div class="tab-pane fade {{ $index == 0 ? 'show active' : '' }}"
+                                id="program{{ $program->id }}" role="tabpanel">
 
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 40%">Menu</th>
-                                            <th class="text-center" style="width: 15%">
-                                                View
-                                                <input type="checkbox" class="master-col-check"
-                                                    data-program="{{ $program->id }}" data-action="view">
-                                            </th>
-                                            <th class="text-center" style="width: 15%">
-                                                Insert
-                                                <input type="checkbox" class="master-col-check"
-                                                    data-program="{{ $program->id }}" data-action="insert">
-                                            </th>
-                                            <th class="text-center" style="width: 15%">
-                                                Update
-                                                <input type="checkbox" class="master-col-check"
-                                                    data-program="{{ $program->id }}" data-action="update">
-                                            </th>
-                                            <th class="text-center" style="width: 15%">
-                                                Delete
-                                                <input type="checkbox" class="master-col-check"
-                                                    data-program="{{ $program->id }}" data-action="delete">
-                                            </th>
-                                            <th class="text-center" style="width: 10%">
-                                                All Menu
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($program->menus as $menu)
-                                            @php $perm = $existing->get($menu->id); @endphp
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered align-middle">
+                                        <thead>
                                             <tr>
-                                                <td>
-                                                    <strong>{{ $menu->name }}</strong>
-                                                    @if ($menu->description)
-                                                        <br><small class="text-muted">{{ $menu->description }}</small>
-                                                    @endif
-                                                </td>
-
-                                                @foreach (['view', 'insert', 'update', 'delete'] as $action)
-                                                    <td class="text-center">
-                                                        <input type="checkbox"
-                                                            name="permissions[{{ $menu->id }}][can_{{ $action }}]"
-                                                            class="perm-cb prog-{{ $program->id }} col-{{ $action }}"
-                                                            data-program="{{ $program->id }}"
-                                                            data-action="{{ $action }}"
-                                                            {{ $perm && $perm->{'can_' . $action} ? 'checked' : '' }}>
-                                                    </td>
-                                                @endforeach
-
-                                                <td class="text-center">
-                                                    <input type="checkbox" class="row-master-check"
-                                                        data-program="{{ $program->id }}"
-                                                        data-menu="{{ $menu->id }}">
-                                                </td>
+                                                <th style="width: 40%">Menu</th>
+                                                <th class="text-center" style="width: 15%">
+                                                    View
+                                                    <input type="checkbox" class="master-col-check"
+                                                        data-program="{{ $program->id }}" data-action="view">
+                                                </th>
+                                                <th class="text-center" style="width: 15%">
+                                                    Insert
+                                                    <input type="checkbox" class="master-col-check"
+                                                        data-program="{{ $program->id }}" data-action="insert">
+                                                </th>
+                                                <th class="text-center" style="width: 15%">
+                                                    Update
+                                                    <input type="checkbox" class="master-col-check"
+                                                        data-program="{{ $program->id }}" data-action="update">
+                                                </th>
+                                                <th class="text-center" style="width: 15%">
+                                                    Delete
+                                                    <input type="checkbox" class="master-col-check"
+                                                        data-program="{{ $program->id }}" data-action="delete">
+                                                </th>
+                                                <th class="text-center" style="width: 10%">
+                                                    All Menu
+                                                </th>
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($program->menus as $menu)
+                                                @php $perm = $existing->get($menu->id); @endphp
+                                                <tr>
+                                                    <td>
+                                                        <strong>{{ $menu->name }}</strong>
+                                                        @if ($menu->description)
+                                                            <br><small class="text-muted">{{ $menu->description }}</small>
+                                                        @endif
+                                                    </td>
+
+                                                    @foreach (['view', 'insert', 'update', 'delete'] as $action)
+                                                        <td class="text-center">
+                                                            <input type="checkbox"
+                                                                name="permissions[{{ $menu->id }}][can_{{ $action }}]"
+                                                                class="perm-cb prog-{{ $program->id }} col-{{ $action }}"
+                                                                data-program="{{ $program->id }}"
+                                                                data-action="{{ $action }}"
+                                                                {{ $perm && $perm->{'can_' . $action} ? 'checked' : '' }}>
+                                                        </td>
+                                                    @endforeach
+
+                                                    <td class="text-center">
+                                                        <input type="checkbox" class="row-master-check"
+                                                            data-program="{{ $program->id }}"
+                                                            data-menu="{{ $menu->id }}">
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="row justify-content-end mt-3">
+                        <div class="col-sm-10">
+                            <div class="d-flex justify-content-end flex-wrap flex-sm-nowrap gap-2">
+                                <button type="submit" class="btn btn-primary w-100 w-200">Simpan</button>
+                                <a href="{{ url('/master/user-menu-permissions') }}" type="button"
+                                    class="btn btn-warning w-100 w-200">Batal</a>
                             </div>
                         </div>
-                    @endforeach
-                </div>
-
-                <div class="row justify-content-end">
-                    <div class="col-sm-10">
-                        <div class="d-flex justify-content-end flex-wrap flex-sm-nowrap gap-2">
-                            <button type="submit" class="btn btn-primary w-100 w-200">Simpan</button>
-                            <a href="{{ url('/master/user-menu-permissions') }}" type="button"
-                                class="btn btn-warning w-100 w-200">Batal</a>
-                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            @endif
         </div>
     </div>
 @endsection
@@ -197,6 +208,22 @@
         .btn-primary:hover {
             background: #4338ca;
         }
+
+        .alert-warning {
+            background-color: #fef3c7;
+            border-color: #fde68a;
+            color: #92400e;
+        }
+
+        .alert-warning a {
+            color: #92400e;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        .alert-warning a:hover {
+            color: #78350f;
+        }
     </style>
 @endsection
 
@@ -215,7 +242,7 @@
 
         function updateColumnMaster(programId, action) {
             let checkboxes = document.querySelectorAll(`.prog-${programId}.col-${action}`);
-            let allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            let allChecked = checkboxes.length > 0 && Array.from(checkboxes).every(cb => cb.checked);
             let masterCheck = document.querySelector(
                 `.master-col-check[data-program="${programId}"][data-action="${action}"]`);
 
@@ -225,12 +252,15 @@
         }
 
         function checkAllRowsInProgram(programId) {
-            let rows = document.querySelectorAll(`.prog-${programId}`).forEach(cb => {
-                let row = cb.closest('tr');
-                let menuId = row.querySelector('.row-master-check')?.dataset.menu;
+            let menus = new Set();
+            document.querySelectorAll(`.prog-${programId}`).forEach(cb => {
+                let menuId = cb.closest('tr').querySelector('.row-master-check')?.dataset.menu;
                 if (menuId) {
-                    updateRowMaster(programId, menuId);
+                    menus.add(menuId);
                 }
+            });
+            menus.forEach(menuId => {
+                updateRowMaster(programId, menuId);
             });
         }
 
@@ -283,7 +313,7 @@
             });
         });
 
-        document.querySelectorAll('.perm-cb').forEach(() => {
+        document.addEventListener('DOMContentLoaded', function() {
             let programs = [...new Set(Array.from(document.querySelectorAll('.perm-cb')).map(cb => cb.dataset
                 .program))];
             programs.forEach(programId => {

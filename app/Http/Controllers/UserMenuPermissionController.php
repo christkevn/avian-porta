@@ -16,8 +16,11 @@ class UserMenuPermissionController extends Controller
 
     public function edit($user_id)
     {
-        $user     = Users::findOrFail($user_id);
-        $programs = Program::with('menus')->orderBy('name')->get();
+        $user = Users::findOrFail($user_id);
+
+        $programs = Program::whereHas('userPrograms', function ($query) use ($user_id) {
+            $query->where('user_id', $user_id);
+        })->with('menus')->orderBy('name')->get();
 
         $existing = UserMenuPermission::where('user_id', $user_id)
             ->get()
