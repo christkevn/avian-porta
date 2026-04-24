@@ -10,6 +10,7 @@ class UserMenuPermissionController extends Controller
 {
     public function index()
     {
+        createLog('akses_menu', 'Permission Menu');
         $users = Users::where('aktif', 1)->orderBy('nama')->get();
         return view('permissions.menu_index', compact('users'));
     }
@@ -33,6 +34,8 @@ class UserMenuPermissionController extends Controller
     {
         $user = Users::findOrFail($user_id);
 
+        $dataInit = UserMenuPermission::where('user_id', $user_id)->get()->toJson();
+
         UserMenuPermission::where('user_id', $user_id)->delete();
 
         $permissions = $request->input('permissions', []);
@@ -47,6 +50,15 @@ class UserMenuPermissionController extends Controller
                 'can_delete' => isset($perms['can_delete']) ? 1 : 0,
             ]);
         }
+
+        $dataUpdate = UserMenuPermission::where('user_id', $user_id)->get()->toJson();
+
+        createLog(
+            'update_permission_menu',
+            'Permission Menu',
+            $dataInit,
+            $dataUpdate
+        );
 
         return redirect('/master/user-menu-permissions')
             ->with('message', "Permission menu untuk {$user->nama} berhasil disimpan.")

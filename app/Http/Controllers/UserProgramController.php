@@ -10,6 +10,7 @@ class UserProgramController extends Controller
 {
     public function index()
     {
+        createLog('akses_menu', 'Permission Program');
         $users = Users::where('aktif', 1)->orderBy('nama')->get();
         return view('permissions.program_index', compact('users'));
     }
@@ -27,6 +28,8 @@ class UserProgramController extends Controller
     {
         $user = Users::findOrFail($user_id);
 
+        $dataInit = UserProgram::where('user_id', $user_id)->get()->toJson();
+
         UserProgram::where('user_id', $user_id)->delete();
 
         $programIds = $request->input('program_ids', []);
@@ -36,6 +39,15 @@ class UserProgramController extends Controller
                 'program_id' => $program_id,
             ]);
         }
+
+        $dataUpdate = UserProgram::where('user_id', $user_id)->get()->toJson();
+
+        createLog(
+            'update_permission_program',
+            'Permission Program',
+            $dataInit,
+            $dataUpdate
+        );
 
         return redirect('/master/user-program-permissions')
             ->with('message', "Program untuk {$user->nama} berhasil disimpan.")

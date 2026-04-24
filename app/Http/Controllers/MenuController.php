@@ -10,6 +10,7 @@ class MenuController extends Controller
 {
     public function index()
     {
+        createLog('akses_menu', 'Menu');
         $programs = Program::all();
 
         return view('menus.index', compact('programs'));
@@ -43,6 +44,8 @@ class MenuController extends Controller
             'name'       => 'required|max:100',
         ]);
 
+        createLog('create_menu', 'Menu', null, $request->all());
+
         Menu::create([
             'program_id' => $request->program_id,
             'name'       => $request->name,
@@ -60,7 +63,9 @@ class MenuController extends Controller
 
     public function update(Request $request, $id)
     {
-        $data = Menu::findOrFail($id);
+        $data     = Menu::findOrFail($id);
+        $dataInit = $data->toJson();
+
         $request->validate([
             'program_id' => 'required|exists:programs,id',
             'name'       => 'required|max:100',
@@ -70,12 +75,15 @@ class MenuController extends Controller
         $data->name       = $request->name;
         $data->save();
 
+        createLog('update_menu', 'Menu', $dataInit, $data->toJson());
+
         return redirect('/master/menus')->with('message', 'Menu berhasil diperbarui.')->with('mode', 'success');
     }
 
     public function destroy($id)
     {
         $data = Menu::findOrFail($id);
+        createLog('delete_menu', 'Menu', $data->id, $data->toJson());
         $data->delete();
         return redirect('/master/menus')->with('message', 'Menu berhasil dihapus.')->with('mode', 'success');
     }

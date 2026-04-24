@@ -9,6 +9,7 @@ class ProgramController extends Controller
 {
     public function index()
     {
+        createLog('akses_menu', 'Program');
         return view('programs.index');
     }
 
@@ -38,11 +39,13 @@ class ProgramController extends Controller
     {
         $request->validate(['name' => 'required|unique:programs,name|max:100']);
 
-        Program::create([
+        $data = Program::create([
             'name'       => $request->name,
             'url'        => $request->url,
             'created_at' => now(),
         ]);
+
+        createLog('create_program', 'program', null, $data->toJson());
 
         return redirect('/master/programs')->with('message', 'Program berhasil ditambahkan.')->with('mode', 'success');
     }
@@ -56,19 +59,25 @@ class ProgramController extends Controller
     public function update(Request $request, $id)
     {
         $data = Program::findOrFail($id);
+
+        $dataInit = $data->toJson();
+
         $request->validate(['name' => "required|unique:programs,name,{$id}|max:100"]);
 
         $data->name = $request->name;
         $data->url  = $request->url;
         $data->save();
-
+        createLog('update_program', 'program', $dataInit, $data->toJson());
         return redirect('/master/programs')->with('message', 'Program berhasil diperbarui.')->with('mode', 'success');
     }
 
     public function destroy($id)
     {
-        $data = Program::findOrFail($id);
+        $data     = Program::findOrFail($id);
+        $dataInit = $data->toJson();
+        createLog('delete_program', 'program', $dataInit, null);
         $data->delete();
+
         return redirect('/master/programs')->with('message', 'Program berhasil dihapus.')->with('mode', 'success');
     }
 }

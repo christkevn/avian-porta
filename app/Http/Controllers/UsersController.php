@@ -12,6 +12,7 @@ class UsersController extends Controller
 {
     public function index(Request $request)
     {
+        createLog('akses_menu', 'Users');
         return view('users.index');
     }
 
@@ -26,7 +27,7 @@ class UsersController extends Controller
     {
         $validated = $this->validateUsers($request);
 
-        Users::create([
+        $data = Users::create([
             'username'   => $validated['username'],
             'password'   => bcrypt($validated['password']),
             'tipe'       => $validated['tipe_user'],
@@ -38,6 +39,7 @@ class UsersController extends Controller
             'updated_by' => Session::get('userinfo')['username'],
         ]);
 
+        createLog('create_user', 'Users', null, $data->toJson());
         return redirect('/master/users')
             ->with('message', 'Data sudah disimpan')
             ->with('mode', 'success');
@@ -54,7 +56,9 @@ class UsersController extends Controller
 
     public function update(Request $request, $id)
     {
-        $data      = Users::findOrFail($id);
+        $data     = Users::findOrFail($id);
+        $dataInit = $data->toJson();
+
         $validated = $this->validateUsersUpdate($request, $id);
 
         $data->username   = $validated['username'];
@@ -70,6 +74,7 @@ class UsersController extends Controller
         }
 
         $data->save();
+        createLog('update_user', 'Users', $dataInit, $data->toJson());
 
         return redirect('/master/users')
             ->with('message', 'Data sudah diperbarui')
@@ -78,11 +83,13 @@ class UsersController extends Controller
 
     public function destroy($id)
     {
-        $data = Users::findOrFail($id);
-
+        $data             = Users::findOrFail($id);
+        $dataInit         = $data->toJson();
         $data->aktif      = 0;
         $data->updated_by = Session::get('userinfo')['username'];
         $data->save();
+
+        createLog('delete_user', 'Users', $dataInit, null);
 
         return Redirect::to('/master/users/')
             ->with('message', 'Data sudah dihapus')
