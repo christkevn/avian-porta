@@ -4,83 +4,60 @@
 
 @section('css')
     <style>
-        .program-bubbles {
-            display: flex;
-            flex-wrap: wrap;
+        .program-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             margin-top: 30px;
         }
 
-        .program-bubble {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 150px;
-            height: 150px;
-            background: linear-gradient(135deg, #0D9394 0%, #0a7a7b 100%);
-            border-radius: 50%;
-            color: white;
+        .program-card {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            border-radius: 16px;
+            overflow: hidden;
             text-decoration: none;
+            display: block;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(13, 147, 148, 0.3);
-            cursor: pointer;
-            text-align: center;
-            padding: 20px;
         }
 
-        .program-bubble:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(13, 147, 148, 0.4);
-            color: white;
+        .program-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
         }
 
-        .program-bubble i {
-            font-size: 48px;
-            margin-bottom: 10px;
+        .program-bg {
+            position: absolute;
+            inset: 0;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: #fff;
+            transition: transform 0.4s ease;
         }
 
-        .program-bubble span {
+        .program-card:hover .program-bg {
+            transform: scale(1.05);
+        }
+
+        .program-name {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 10px 12px;
             font-size: 14px;
-            font-weight: 500;
-            word-break: break-word;
-        }
-
-        .section-title {
-            font-size: 20px;
             font-weight: 600;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #0D9394;
-            display: inline-block;
-        }
-
-        .empty-programs {
+            color: #fff;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent);
             text-align: center;
-            padding: 50px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .program-bubble {
-                width: 120px;
-                height: 120px;
-            }
-
-            .program-bubble i {
-                font-size: 36px;
-            }
-
-            .program-bubble span {
-                font-size: 12px;
-            }
         }
     </style>
 @endsection
 
 @section('content')
+
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -115,14 +92,33 @@
                     <i class="ri ri-apps-2-line me-2"></i>
                     Program yang Tersedia
                 </h5>
-                <div class="program-bubbles">
+
+                <div class="program-grid">
                     @foreach ($programs as $program)
                         @if ($program->url)
                             <a href="{{ Str::startsWith($program->url, 'http') ? $program->url : url($program->url) }}"
-                                class="program-bubble"
+                                class="program-card"
                                 target="{{ Str::startsWith($program->url, 'http') ? '_blank' : '_self' }}">
-                                <i class="ri ri-apps-line"></i>
-                                <span>{{ $program->name }}</span>
+
+                                @php
+                                    $photo = $program->photo_url;
+
+                                    if ($photo) {
+                                        $photoUrl = Str::startsWith($photo, 'http')
+                                            ? $photo
+                                            : asset('storage/' . $photo);
+                                    } else {
+                                        $photoUrl = asset('default.jpg');
+                                    }
+                                @endphp
+
+                                <div class="program-bg" style="background-image: url('{{ $photoUrl }}')">
+                                </div>
+
+                                <div class="program-name">
+                                    {{ $program->name }}
+                                </div>
+
                             </a>
                         @endif
                     @endforeach
@@ -140,10 +136,9 @@
             </div>
         </div>
     @endif
+
 @endsection
 
 @section('script')
-    <script>
-        // Tambahan script jika diperlukan
-    </script>
+    <script></script>
 @endsection

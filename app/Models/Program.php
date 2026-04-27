@@ -11,6 +11,7 @@ class Program extends Model
     protected $fillable = [
         'name',
         'url',
+        "photo_url",
         'created_at',
     ];
 
@@ -24,5 +25,18 @@ class Program extends Model
     public function userPrograms()
     {
         return $this->hasMany(UserProgram::class, 'program_id');
+    }
+
+    public function getPhotoUrlAttribute($value)
+    {
+        if ($value && file_exists(storage_path('app/public/' . $value))) {
+            return asset('storage/' . $value);
+        }
+        return null;
+    }
+
+    public function getPhotoPathAttribute()
+    {
+        return $this->attributes['photo_url'] ?? null;
     }
 }
