@@ -28,15 +28,16 @@ class UsersController extends Controller
         $validated = $this->validateUsers($request);
 
         $data = Users::create([
-            'username'   => $validated['username'],
-            'password'   => bcrypt($validated['password']),
-            'tipe'       => $validated['tipe_user'],
-            'nama'       => $validated['nama_users'],
-            'email'      => $validated['email_users'],
-            'level'      => $validated['level_users'],
-            'aktif'      => $request->has('aktif') ? 1 : 0,
-            'created_by' => Session::get('userinfo')['username'],
-            'updated_by' => Session::get('userinfo')['username'],
+            'username'           => $validated['username'],
+            'password'           => bcrypt($validated['password']),
+            'tipe'               => $validated['tipe_user'],
+            'nama'               => $validated['nama_users'],
+            'email'              => $validated['email_users'],
+            'level'              => $validated['level_users'],
+            'aktif'              => $request->has('aktif') ? 1 : 0,
+            'created_by'         => Session::get('userinfo')['username'],
+            'updated_by'         => Session::get('userinfo')['username'],
+            'password_expiry_at' => now()->addDays(90),
         ]);
 
         createLog('create_user', 'Users', null, $data->toJson());
@@ -70,7 +71,8 @@ class UsersController extends Controller
         $data->updated_by = Session::get('userinfo')['username'];
 
         if ($request->filled('password')) {
-            $data->password = bcrypt($validated['password']);
+            $data->password           = bcrypt($validated['password']);
+            $data->password_expiry_at = now()->addDays(90);
         }
 
         $data->save();
