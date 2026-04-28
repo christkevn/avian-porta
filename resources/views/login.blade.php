@@ -66,7 +66,7 @@
                 <div class="card-body mt-1">
                     <h4 class="mb-1">{{ getData('title') }}</h4>
                     <p class="mb-5">Silahkan masuk ke akun anda</p>
-                    @if(session('message_success'))
+                    @if (session('message_success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('message_success') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -124,37 +124,50 @@
     <!-- Page JS -->
     <script type="text/javascript">
         document.documentElement.style.setProperty('--' + window.Helpers.prefix + 'primary', '#0D9394');
+        const routes = {
+            login: "{{ route('login') }}",
+            dashboard: "{{ route('dashboard') }}",
+            changePassword: "{{ route('change.password.form') }}"
+        };
+
         $("#formLogin").submit(function() {
-            var url = "<?= url('/') ?>/login";
-            var frm_data = $("#formLogin").serialize();
+            let frm_data = $(this).serialize();
+
             $.ajax({
                 type: "POST",
-                url: url,
+                url: routes.login,
                 data: frm_data,
+
                 success: function(response) {
                     if (response.status) {
-                        window.location.href = "<?= url('/') ?>/dashboard";
+                        window.location.href = routes.dashboard;
+
                     } else if (response.expired) {
-                        // Redirect ke halaman ganti password
-                        var locked = response.locked ? '&locked=1' : '';
-                        window.location.href = "<?= url('/') ?>/change-password?username=" + encodeURIComponent(response.username) + locked;
+                        let locked = response.locked ? '&locked=1' : '';
+
+                        window.location.href = routes.changePassword +
+                            "?username=" + encodeURIComponent(response.username) + locked;
+
                     } else {
                         $('.error-alert').html("");
+
                         $.each(response.message, function(key, value) {
-                            $('.error-alert').append(
-                                '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
-                                value +
-                                '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div></div>'
-                            );
+                            $('.error-alert').append(`
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                ${value}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `);
                         });
                     }
                 },
-                error: function(response) {
-                    console.log(response);
+
+                error: function() {
                     alert('Ada kesalahan login. Silahkan coba lagi');
                     location.reload();
                 }
             });
+
             return false;
         });
     </script>

@@ -23,25 +23,27 @@ class LoginController extends Controller
 
     private function recordFailedAttempt(Users $user, string $ip): void
     {
-        $attempt = $this->getAttempt($user->username, $ip);
-        $attempt->attempt_count   = ($attempt->attempt_count ?? 0) + 1;
-        $attempt->last_attempt_at = now();
-        $attempt->save();
+        if ($user->tipe != 'AD') {
+            $attempt                  = $this->getAttempt($user->username, $ip);
+            $attempt->attempt_count   = ($attempt->attempt_count ?? 0) + 1;
+            $attempt->last_attempt_at = now();
+            $attempt->save();
 
-        if ($attempt->attempt_count >= self::MAX_ATTEMPTS) {
-            $user->password_expiry_at = now();
-            $user->save();
+            if ($attempt->attempt_count >= self::MAX_ATTEMPTS) {
+                $user->password_expiry_at = now();
+                $user->save();
+            }
         }
     }
 
-    private function resetAttempt(string $username, string $ip): void
+    public function resetAttempt(string $username, string $ip): void
     {
         LoginAttempt::where('username', $username)
             ->where('ip_address', $ip)
             ->delete();
     }
 
-    private function doLogin(Request $request): array
+    public function doLogin(Request $request): array
     {
         $data = [
             'response' => ['message' => 'An error occured', 'error' => []],
@@ -83,8 +85,8 @@ class LoginController extends Controller
         } else {
             if (! Hash::check($request->password, $user->password)) {
                 $this->recordFailedAttempt($user, $ip);
-                $sisa = self::MAX_ATTEMPTS - (($attempt->attempt_count ?? 0) + 1);
-                $msg  = 'Username / Password salah.' . ($sisa > 0 ? " Sisa percobaan: {$sisa}x." : ' Akun terkunci, silahkan ganti password.');
+                $sisa                      = self::MAX_ATTEMPTS - (($attempt->attempt_count ?? 0) + 1);
+                $msg                       = 'Username / Password salah.' . ($sisa > 0 ? " Sisa percobaan: {$sisa}x." : ' Akun terkunci, silahkan ganti password.');
                 $data['response']['error'] = [[$msg]];
                 return $data;
             }
@@ -117,7 +119,10 @@ class LoginController extends Controller
     public function index(Request $request)
     {
         if ($request->isMethod('GET')) {
-            if (Session::get('userinfo')) return redirect('dashboard');
+            if (Session::get('userinfo')) {
+                return redirect('dashboard');
+            }
+
             return view('login');
         }
 
@@ -155,9 +160,9 @@ class LoginController extends Controller
     public function changePassword(Request $request)
     {
         $request->validate([
-            'username'                 => 'required',
-            'password_new'             => 'required|min:6|confirmed',
-            'password_new_confirmation'=> 'required',
+            'username'                  => 'required',
+            'password_new'              => 'required|min:6|confirmed',
+            'password_new_confirmation' => 'required',
         ], [
             'password_new.confirmed' => 'Konfirmasi password tidak cocok.',
             'password_new.min'       => 'Password minimal 6 karakter.',
