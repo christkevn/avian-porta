@@ -85,7 +85,7 @@
             responsive: true,
             autoWidth: false,
             ajax: {
-                url: "{{ route('users.datatable') }}",
+                url: "{{ route('master.users.datatable') }}",
                 data: function(d) {
                     d.level = $('#filter_level').val();
                 }
@@ -142,7 +142,7 @@
         $('#btnClearFilter').on('click', function(e) {
             e.preventDefault();
 
-            $.post("{{ route('users.clearFilter') }}", {
+            $.post("{{ route('master.users.clearFilter') }}", {
                 _token: "{{ csrf_token() }}"
             }, function() {
                 $('#filter_level').val('');

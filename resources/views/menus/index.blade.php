@@ -73,7 +73,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route('menus.datatable') }}",
+                    url: "{{ route('master.menus.datatable') }}",
                     data: function(d) {
                         d.program_id = $('#filter_program').val();
                     }
