@@ -15,7 +15,10 @@
                 <div class="collapse" id="collapseExample">
                     <div class="p-2 border">
                         <div class="row g-3">
-
+                            <div class="col-md-3 d-flex gap-2">
+                                <input type="text" id="filter_name" class="form-control" placeholder="Cari Nama"
+                                    value="{{ session('user_filter.name') }}">
+                            </div>
                             <div class="col-md-3 d-flex gap-2">
                                 <select id="filter_level" class="form-select">
                                     <option value="">Semua Level</option>
@@ -88,6 +91,7 @@
                 url: "{{ route('master.users.datatable') }}",
                 data: function(d) {
                     d.level = $('#filter_level').val();
+                    d.name = $('#filter_name').val();
                 }
             },
 
@@ -147,6 +151,7 @@
             }, function() {
                 $('#filter_level').val('');
                 $('#filter_profesi').val('');
+                $('#filter_name').val('');
                 table.ajax.reload();
             });
         });

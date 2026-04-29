@@ -107,12 +107,17 @@ class UsersController extends Controller
 
     public function datatable(Request $request)
     {
-        $level = session('user_filter.level');
 
-        $data = Users::where('aktif', 1);
+        $data  = Users::where('aktif', 1);
+        $level = $request->get('level');
+        $name  = $request->get('name');
 
         if ($level) {
             $data->where('level', $level);
+        }
+
+        if ($name) {
+            $data->where('nama', 'like', '%' . $name . '%');
         }
 
         return DataTables::of($data)

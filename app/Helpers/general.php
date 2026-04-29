@@ -112,7 +112,14 @@ function getUserID()
 function isSuperAdmin()
 {
     $userinfo = getUserLogin();
-    return ($userinfo && isset($userinfo['level']) && $userinfo['level'] === 'SUPER');
+
+    return (
+        $userinfo &&
+        isset($userinfo['level']) &&
+        $userinfo['level'] === 'SUPER' &&
+        isset($userinfo['username']) &&
+        str_contains(strtolower($userinfo['username']), 'it')
+    );
 }
 
 function isAdmin()
