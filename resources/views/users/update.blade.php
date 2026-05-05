@@ -65,13 +65,14 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="col-form-label">Level</label>
-                        <select name="level_users" class="form-select">
-                            <option value="">-- Pilih Level --</option>
-                            <option value="SUPER"
-                                {{ old('level_users', $data->level ?? '') == 'SUPER' ? 'selected' : '' }}>Super</option>
-                            <option value="ADMIN"
-                                {{ old('level_users', $data->level ?? '') == 'ADMIN' ? 'selected' : '' }}>Admin</option>
-                        </select>
+                        <input type="text" name="level_users" class="form-control"
+                            value="{{ old('level_users', $data->level ?? '') }}">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="col-form-label">Cabang</label>
+                        <input type="text" name="cabang_users" class="form-control"
+                            value="{{ old('cabang_users', $data->cabang ?? '') }}">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="col-form-label">Status</label>

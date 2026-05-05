@@ -22,10 +22,12 @@
                             <div class="col-md-3 d-flex gap-2">
                                 <select id="filter_level" class="form-select">
                                     <option value="">Semua Level</option>
-                                    <option value="SUPER" {{ session('user_filter.level') == 'SUPER' ? 'selected' : '' }}>
-                                        Super</option>
-                                    <option value="ADMIN" {{ session('user_filter.level') == 'ADMIN' ? 'selected' : '' }}>
-                                        ADMIN</option>
+                                    @foreach ($levels as $level)
+                                        <option value="{{ $level->level }}"
+                                            {{ session('user_filter.level') == $level->level ? 'selected' : '' }}>
+                                            {{ $level->level }}
+                                        </option>
+                                    @endforeach
                                 </select>
 
                             </div>

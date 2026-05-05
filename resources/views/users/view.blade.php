@@ -46,6 +46,11 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
+                        <label class="col-form-label">Cabang</label>
+                        <input disabled type="text" class="form-control" value="{{ $user->cabang }}">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
                         <label class="col-form-label" for="status">Status</label>
                         <div class="d-flex align-items-center">
                             <?= status($user->aktif) ?>

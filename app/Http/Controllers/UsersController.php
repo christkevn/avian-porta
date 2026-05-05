@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Users;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Redirect;
 use Session;
 use Yajra\DataTables\Facades\DataTables;
@@ -13,7 +14,9 @@ class UsersController extends Controller
     public function index(Request $request)
     {
         createLog('akses_menu', 'Users');
-        return view('users.index');
+
+        $levels = DB::table('users')->select('level')->distinct()->get();
+        return view('users.index', compact('levels'));
     }
 
     public function create()
@@ -34,6 +37,7 @@ class UsersController extends Controller
             'nama'               => $validated['nama_users'],
             'email'              => $validated['email_users'],
             'level'              => $validated['level_users'],
+            'cabang'             => $validated['cabang_users'],
             'aktif'              => $request->has('aktif') ? 1 : 0,
             'created_by'         => Session::get('userinfo')['username'],
             'updated_by'         => Session::get('userinfo')['username'],
@@ -67,6 +71,7 @@ class UsersController extends Controller
         $data->nama       = $validated['nama_users'];
         $data->email      = $validated['email_users'];
         $data->level      = $validated['level_users'];
+        $data->cabang     = $validated['cabang_users'];
         $data->aktif      = $request->has('aktif') ? 1 : 0;
         $data->updated_by = Session::get('userinfo')['username'];
 
@@ -150,30 +155,33 @@ class UsersController extends Controller
     private function validateUsers(Request $request)
     {
         return $request->validate([
-            'username'    => 'required|string|max:50',
-            'password'    => 'nullable|required_unless:tipe_user,AD|string|max:100',
-            'tipe_user'   => 'required|in:AD,USER',
-            'nama_users'  => 'required|string|max:100',
-            'email_users' => 'required|email|max:100',
-            'level_users' => 'required|string|max:50|in:SUPER,BM,SPECIAL PROJECT,TRAINER,SALES,ADMIN',
+            'username'     => 'required|string|max:50',
+            'password'     => 'nullable|required_unless:tipe_user,AD|string|max:100',
+            'tipe_user'    => 'required|in:AD,USER',
+            'nama_users'   => 'required|string|max:100',
+            'email_users'  => 'required|email|max:100',
+            'level_users'  => 'required|string|max:50',
+            'cabang_users' => 'nullable|string|max:50',
         ], [
             'password.required_unless' => 'Password wajib diisi untuk user selain AD',
             'nama_users.required'      => 'Nama wajib diisi',
             'email_users.required'     => 'Email wajib diisi',
             'email_users.email'        => 'Format email tidak valid',
             'level_users.in'           => 'Level user tidak valid',
+            'cabang_users.max'         => 'Maksimal 50 karakter',
         ]);
     }
 
     private function validateUsersUpdate(Request $request, $id)
     {
         return $request->validate([
-            'username'    => 'required|string|max:50|unique:users,username,' . $id,
-            'password'    => 'nullable|string|min:6|max:100',
-            'tipe_user'   => 'required|in:AD,USER',
-            'nama_users'  => 'required|string|max:100',
-            'email_users' => 'required|email|max:100|unique:users,email,' . $id,
-            'level_users' => 'required|string|max:50|in:SUPER,BM,SPECIAL PROJECT,TRAINER,SALES',
+            'username'     => 'required|string|max:50|unique:users,username,' . $id,
+            'password'     => 'nullable|string|min:6|max:100',
+            'tipe_user'    => 'required|in:AD,USER',
+            'nama_users'   => 'required|string|max:100',
+            'email_users'  => 'required|email|max:100|unique:users,email,' . $id,
+            'level_users'  => 'required|string|max:50',
+            'cabang_users' => 'nullable|string|max:50',
         ], [
             'username.unique'      => 'Username sudah digunakan',
             'email_users.unique'   => 'Email sudah digunakan',
@@ -181,6 +189,7 @@ class UsersController extends Controller
             'email_users.required' => 'Email wajib diisi',
             'email_users.email'    => 'Format email tidak valid',
             'level_users.in'       => 'Level user tidak valid',
+            'cabang_users.max'     => 'Maksimal 50 karakter',
         ]);
     }
 
