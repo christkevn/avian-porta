@@ -16,9 +16,14 @@ class MenuController extends Controller
         return view('menus.index', compact('programs'));
     }
 
-    public function datatable()
+    public function datatable(Request $request)
     {
         $data = Menu::with('program')->orderBy('program_id')->orderBy('id')->get();
+
+        if ($request->has('program_id') && $request->program_id != '') {
+            $data = $data->where('program_id', $request->program_id);
+        }
+
         return DataTables::of($data)
             ->addIndexColumn()
             ->addColumn('program_name', fn($row) => $row->program->name ?? '-')

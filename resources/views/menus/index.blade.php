@@ -68,8 +68,10 @@
 @section('script')
     @include('partials.deletejs')
     <script>
+        let table;
+
         $(document).ready(function() {
-            $('.datatables-basic').DataTable({
+            table = $('.datatables-basic').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
@@ -100,17 +102,17 @@
                     },
                 ],
             });
-        });
 
-        $('#btnFilter').on('click', function(e) {
-            e.preventDefault();
-            var programId = $('#filter_program').val();
-            window.location.href = "{{ url('/master/menus') }}?program_id=" + programId;
-        });
+            $('#btnFilter').on('click', function(e) {
+                e.preventDefault();
+                table.ajax.reload();
+            });
 
-        $('#btnClearFilter').on('click', function(e) {
-            e.preventDefault();
-            window.location.href = "{{ url('/master/menus') }}";
+            $('#btnClearFilter').on('click', function(e) {
+                e.preventDefault();
+                $('#filter_program').val('');
+                table.ajax.reload();
+            });
         });
     </script>
 @endsection

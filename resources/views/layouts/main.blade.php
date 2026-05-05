@@ -3,6 +3,7 @@ $userinfo = Session::get('userinfo');
 $username = $userinfo['username'];
 $level = $userinfo['level'];
 $nama = $userinfo['nama'];
+$isSuperAdmin = isSuperAdmin();
 ?>
 
 <!DOCTYPE html>
@@ -165,7 +166,9 @@ $nama = $userinfo['nama'];
                     </a>
                 </div>
                 <div class="menu-inner-shadow"></div>
-                @include('partials.menu')
+                @if ($isSuperAdmin)
+                    @include('partials.menu')
+                @endif
             </aside>
             <!-- / Menu -->
             <!-- Layout container -->
