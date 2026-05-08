@@ -96,9 +96,7 @@
                 <div class="program-grid">
                     @foreach ($programs as $program)
                         @if ($program->url)
-                            <a href="{{ Str::startsWith($program->url, 'http') ? $program->url : url($program->url) }}"
-                                class="program-card"
-                                target="{{ Str::startsWith($program->url, 'http') ? '_blank' : '_self' }}">
+                            <a href="{{ route('program.access', $program->id) }}" class="program-card" target="_self">
 
                                 @php
                                     $photo = $program->photo_url;

@@ -23,6 +23,7 @@ Route::post('/change-password', [LoginController::class, 'changePassword'])->nam
 // Dashboard
 Route::middleware('token_all')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/program/access/{id}', [DashboardController::class, 'accessProgram'])->name('program.access');
 });
 
 // Super Admin
