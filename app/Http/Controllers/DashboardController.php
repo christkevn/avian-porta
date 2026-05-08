@@ -34,7 +34,7 @@ class DashboardController extends Controller
         createLog(
             'Access Program',
             'Dashboard',
-            $program->name
+            ["program_name" => $program->name],
         );
 
         $url = Str::startsWith($program->url, 'http')
