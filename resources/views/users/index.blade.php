@@ -88,7 +88,7 @@
             processing: true,
             serverSide: true,
             responsive: true,
-            autoWidth: false,
+            autoWidth: true,
             ajax: {
                 url: "{{ route('master.users.datatable') }}",
                 data: function(d) {
