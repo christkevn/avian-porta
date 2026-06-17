@@ -9,19 +9,13 @@
     <meta name="robots" content="noindex, nofollow" />
     <title> <?= getData('title') ?> | Login</title>
     <meta name="description" content="" />
-    <!-- Favicon -->
     <link rel="apple-touch-icon" href="<?= url('imgs/avian.png') ?>">
     <link rel="shortcut icon" href="<?= url('imgs/avian.png') ?>">
-    <!-- Fonts -->
     <link rel="stylesheet" href="<?= url('assets/vendor/fonts/iconify-icons.css') ?>" />
-    <!-- Core CSS -->
     <link rel="stylesheet" href="<?= url('assets/vendor/libs/node-waves/node-waves.css') ?>" />
     <link rel="stylesheet" href="<?= url('assets/vendor/css/core.css') ?>" />
     <link rel="stylesheet" href="<?= url('assets/css/main.css') ?>" />
-    <!-- Vendors CSS -->
     <link rel="stylesheet" href="<?= url('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') ?>" />
-    <!-- endbuild -->
-    <!-- Page CSS -->
     <link rel="stylesheet" href="<?= url('assets/vendor/css/pages/page-auth.css') ?>" />
     <style>
         .navbar_batik_footer {
@@ -42,10 +36,7 @@
             padding-bottom: 80px !important;
         }
     </style>
-    <!-- Helpers -->
     <script src="<?= url('assets/vendor/js/helpers.js') ?>"></script>
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config: Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file. -->
     <script src="<?= url('assets/js/config.js') ?>"></script>
 </head>
 
@@ -53,16 +44,13 @@
     <div class="navbar_batik"><img class="batik_img" src="<?= url('imgs/w-2500.svg') ?>"></div>
     <div class="authentication-wrapper authentication-basic container-p-y">
         <div class="authentication-inner py-6 mx-4">
-            <!-- Login -->
             <div class="card p-sm-7 p-2">
-                <!-- Logo -->
                 <div class="app-brand justify-content-center mt-5">
                     <a href="#" class="app-brand-link gap-3">
                         <span class="text-primary"><img src="<?= url('imgs/avian.png') ?>" width="60px;"></span>
                         <img src="<?= url('imgs/logo.png') ?>"; style="max-width:140px;">
                     </a>
                 </div>
-                <!-- /Logo -->
                 <div class="card-body mt-1">
                     <h4 class="mb-1">{{ getData('title') }}</h4>
                     <p class="mb-5">Silahkan masuk ke akun anda</p>
@@ -99,67 +87,105 @@
                     </form>
                     <p class="text-center mb-5">
                         <span>Jika mengalami kendala harap hubungi email berikut :</span>
-                        <a href="mailto:it_web@avianbrands.comm">
-                            <span>it_web@avianbrands.comm</span>
+                        <a href="mailto:it_web@avianbrands.com">
+                            <span>it_web@avianbrands.com</span>
                         </a>
                     </p>
                 </div>
             </div>
-            <!-- /Login -->
         </div>
     </div>
-    <!-- / Content -->
     <div class="navbar_batik_footer"><img class="batik_img" src="<?= url('imgs/w-2500.svg') ?>"></div>
-    <!-- Core JS -->
+
     <script src="<?= url('assets/vendor/libs/jquery/jquery.js') ?>"></script>
     <script src="<?= url('assets/vendor/libs/popper/popper.js') ?>"></script>
     <script src="<?= url('assets/vendor/js/bootstrap.js') ?>"></script>
     <script src="<?= url('assets/vendor/libs/node-waves/node-waves.js') ?>"></script>
     <script src="<?= url('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') ?>"></script>
     <script src="<?= url('assets/vendor/js/menu.js') ?>"></script>
-    <!-- endbuild -->
-    <!-- Vendors JS -->
-    <!-- Main JS -->
     <script src="<?= url('assets/js/main.js') ?>"></script>
-    <!-- Page JS -->
+
     <script type="text/javascript">
         document.documentElement.style.setProperty('--' + window.Helpers.prefix + 'primary', '#0D9394');
+
         const routes = {
             login: "{{ route('login') }}",
             dashboard: "{{ route('dashboard') }}",
             changePassword: "{{ route('change.password.form') }}"
         };
 
+        const AD_RESET_URL = 'https://adss.avianbrands.com/authorization.do';
+
+        function renderErrorAlert(html) {
+            $('.error-alert').html(html);
+        }
+
+        function buildAlert(message, extraHtml = '') {
+            return `
+                <div class="alert alert-danger alert-dismissible fade show">
+                    ${message}
+                    ${extraHtml}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>`;
+        }
+
+        function handleAdError(type, message) {
+            switch (type) {
+                case 'password_expired':
+                    renderErrorAlert(buildAlert(
+                        message,
+                        `<div class="mt-2">
+                            <a href="${AD_RESET_URL}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                Reset Password AD
+                            </a>
+                        </div>`
+                    ));
+                    break;
+
+                case 'account_locked':
+                case 'no_access':
+                    renderErrorAlert(buildAlert(message));
+                    break;
+
+                default:
+                    renderErrorAlert(buildAlert(message));
+            }
+        }
+
         $("#formLogin").submit(function() {
-            let frm_data = $(this).serialize();
+            $('.error-alert').html('');
 
             $.ajax({
                 type: "POST",
                 url: routes.login,
-                data: frm_data,
+                data: $(this).serialize(),
 
                 success: function(response) {
                     if (response.status) {
                         window.location.href = routes.dashboard;
+                        return;
+                    }
 
-                    } else if (response.expired) {
+                    if (response.expired) {
                         let locked = response.locked ? '&locked=1' : '';
-
                         window.location.href = routes.changePassword +
                             "?username=" + encodeURIComponent(response.username) + locked;
-
-                    } else {
-                        $('.error-alert').html("");
-
-                        $.each(response.message, function(key, value) {
-                            $('.error-alert').append(`
-                            <div class="alert alert-danger alert-dismissible fade show">
-                                ${value}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        `);
-                        });
+                        return;
                     }
+
+                    if (response.ad_error_type) {
+                        let message = Array.isArray(response.message) ?
+                            response.message.flat().join(' ') :
+                            response.message;
+                        handleAdError(response.ad_error_type, message);
+                        return;
+                    }
+
+                    let html = '';
+                    $.each(response.message, function(key, value) {
+                        html += buildAlert(value);
+                    });
+                    renderErrorAlert(html);
                 },
 
                 error: function() {
