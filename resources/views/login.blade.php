@@ -143,6 +143,15 @@
                     break;
 
                 case 'account_locked':
+                    renderErrorAlert(buildAlert(
+                        message,
+                        `<div class="mt-2">
+                            <a href="${AD_RESET_URL}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                Unlock Password AD
+                            </a>
+                        </div>`
+                    ));
+                    break;
                 case 'no_access':
                     renderErrorAlert(buildAlert(message));
                     break;
