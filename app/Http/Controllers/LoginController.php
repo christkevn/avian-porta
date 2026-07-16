@@ -26,6 +26,12 @@ class LoginController extends Controller
         '534' => ['type' => 'no_access', 'message' => 'Tidak ada akses. Hubungi IT Helpdesk.'],
     ];
 
+    private function isAllowedRedirect(string $url): bool
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+        return $host && str_ends_with($host, '.avianbrands.com');
+    }
+
     private function parseAdError(?string $ldapError): array
     {
         if ($ldapError && preg_match('/\bdata\s+([0-9a-f]+)\b/i', $ldapError, $m)) {
@@ -181,7 +187,12 @@ class LoginController extends Controller
     {
         if ($request->isMethod('GET')) {
             if (Session::get('userinfo')) {
-                return redirect('dashboard');
+                $redirectUri = $request->query('redirect_uri');
+                \Log::info('Redirect URI: ' . $redirectUri);
+                $target = ($redirectUri && $this->isAllowedRedirect($redirectUri))
+                    ? $redirectUri
+                    : url('dashboard');
+                return redirect($target);
             }
             return view('login');
         }
@@ -190,7 +201,19 @@ class LoginController extends Controller
 
         if ($response['status']) {
             Session::put('userinfo', $response['response']['data']['userinfo']);
-            return new JsonResponse(['status' => true, 'message' => 'Login Success'], 200);
+
+            $redirectUri = $request->input('redirect_uri');
+            \Log::info('Redirect URI: ' . $redirectUri);
+
+            $target = ($redirectUri && $this->isAllowedRedirect($redirectUri))
+                ? $redirectUri
+                : url('dashboard');
+
+            return new JsonResponse([
+                'status'       => true,
+                'message'      => 'Login Success',
+                'redirect_uri' => $target,
+            ], 200);
         }
 
         if (! empty($response['expired']) && ! empty($response['user'])) {

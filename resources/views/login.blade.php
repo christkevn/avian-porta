@@ -62,6 +62,7 @@
                     @endif
                     <form id="formLogin" class="mb-5" method="POST">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+                        <input type="hidden" name="redirect_uri" value="{{ request('redirect_uri') }}" />
                         <div class="error-alert"></div>
                         <div class="form-floating form-floating-outline mb-5 form-control-validation">
                             <input type="text" class="form-control" id="email" name="username"
@@ -171,7 +172,7 @@
 
                 success: function(response) {
                     if (response.status) {
-                        window.location.href = routes.dashboard;
+                        window.location.href = response.redirect_uri || routes.dashboard;
                         return;
                     }
 
