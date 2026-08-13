@@ -42,15 +42,16 @@
                             </div>
                         </a>
                     </li>
-                    {{-- <li>
-				<div class="dropdown-divider my-1"></div>
-			</li>
-			<li>
-				<a class="dropdown-item" href="#">
-				<i class="icon-base ri ri-user-line icon-md me-3"></i>
-				<span>My Profile</span>
-				</a>
-			</li> --}}
+                    <li>
+                        <div class="dropdown-divider my-1"></div>
+                    </li>
+                    <li>
+                        <a class="dropdown-item"
+                            href="<?= url('/change-password?username=' . urlencode(getUserLogin()['username'] ?? '')) ?>">
+                            <i class="icon-base ri ri-lock-line icon-md me-3"></i>
+                            <span>Change Password</span>
+                        </a>
+                    </li>
                     <li>
                         <div class="dropdown-divider my-1"></div>
                     </li>

@@ -74,6 +74,24 @@
             font-size: 12px;
             margin-top: 5px;
         }
+
+        .navbar_batik_footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            line-height: 0;
+            z-index: 10;
+        }
+
+        .navbar_batik_footer .batik_img {
+            width: 100%;
+            display: block;
+        }
+
+        .authentication-wrapper {
+            padding-bottom: 80px !important;
+        }
     </style>
     <script src="<?= url('assets/vendor/js/helpers.js') ?>"></script>
     <script src="<?= url('assets/js/config.js') ?>"></script>
