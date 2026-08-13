@@ -240,7 +240,8 @@ class LoginController extends Controller
 
     public function changePasswordForm(Request $request)
     {
-        $username = $request->query('username', '');
+
+        $username = $request->query('username', Session::get('userinfo.username'));
         return view('auth.change_password', compact('username'));
     }
 

@@ -111,11 +111,9 @@
                 <div class="card-body mt-1">
                     <h4 class="mb-1">Ganti Password</h4>
                     <p class="mb-4 text-danger">
-                        <i class="ri ri-error-warning-line"></i>
                         @if (request()->query('locked'))
+                            <i class="ri ri-error-warning-line"></i>
                             Akun Anda terkunci karena 3x salah password. Silahkan ganti password untuk membuka akun.
-                        @else
-                            Password Anda sudah kadaluarsa. Silahkan ganti password untuk melanjutkan.
                         @endif
                     </p>
 

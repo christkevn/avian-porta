@@ -47,10 +47,9 @@
                             <div class="dropdown-divider my-1"></div>
                         </li>
                         <li>
-                            <a class="dropdown-item"
-                                href="<?= url('/change-password?username=' . urlencode(getUserLogin()['username'] ?? '')) ?>">
+                            <a class="dropdown-item" href="<?= url('/change-password') ?>">
                                 <i class="icon-base ri ri-lock-line icon-md me-3"></i>
-                                <span>Change Password</span>
+                                <span>Ubah Password</span>
                             </a>
                         </li>
                     @endif
