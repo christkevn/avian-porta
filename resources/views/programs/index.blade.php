@@ -22,6 +22,7 @@
                                 <th width="5%">No</th>
                                 <th>Nama Program</th>
                                 <th>URL</th>
+                                <th>Database</th>
                                 <th>Foto</th>
                                 <th>Dibuat</th>
                                 <th width="15%">Aksi</th>
@@ -74,6 +75,10 @@
                     {
                         data: 'url',
                         name: 'url'
+                    },
+                    {
+                        data: 'db_database',
+                        name: 'db_database'
                     },
                     {
                         data: 'photo_url',

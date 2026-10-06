@@ -13,6 +13,7 @@ class Program extends Model
         'url',
         "photo_url",
         'created_at',
+        'db_database',
     ];
 
     public $timestamps = false;

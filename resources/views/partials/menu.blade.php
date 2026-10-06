@@ -61,6 +61,14 @@ if (!$isSuperAdmin && $userId) {
             <div>Permission Program</div>
         </a>
     </li>
+
+    <li class="menu-header">
+        <span class="menu-header-text">Laporan</span>
+        <a href="<?= url('master/reports') ?>" class="menu-link">
+            <i class="menu-icon ri ri-file-list-3-line"></i>
+            <div>Laporan</div>
+        </a>
+    </li>
     <?php endif; ?>
 
 </ul>

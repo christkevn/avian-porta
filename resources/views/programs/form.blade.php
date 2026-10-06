@@ -35,6 +35,12 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
+                        <label class="col-form-label">Database <span class="text-danger">*</span></label>
+                        <input type="text" name="db_database" class="form-control"
+                            value="{{ old('db_database', $data->db_database ?? '') }}" maxlength="100" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
                         <label class="col-form-label">Foto Program</label>
                         <input type="file" name="photo" class="form-control" accept="image/*"
                             onchange="previewImage(this)">
