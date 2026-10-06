@@ -7,11 +7,14 @@ use App\Models\Users;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 use Session;
 
 class LoginController extends Controller
 {
     const MAX_ATTEMPTS = 3;
+    const LOCK_MINUTES = 15;
 
     private const AD_ERROR_MAP = [
         '52e' => ['type' => 'wrong_password', 'message' => 'Username atau password salah.'],
@@ -44,32 +47,34 @@ class LoginController extends Controller
         return ['type' => 'wrong_password', 'message' => 'Username atau password salah.'];
     }
 
-    private function getAttempt(string $username, string $ip): LoginAttempt
+    private function getAttempt(string $username): LoginAttempt
     {
-        return LoginAttempt::firstOrNew([
-            'username'   => $username,
-            'ip_address' => $ip,
-        ]);
+        return LoginAttempt::firstOrNew(['username' => $username]);
     }
 
-    private function recordFailedAttempt(Users $user, string $ip): void
+    private function isLocked(LoginAttempt $attempt): bool
     {
-        $attempt                  = $this->getAttempt($user->username, $ip);
+        return ($attempt->attempt_count ?? 0) >= self::MAX_ATTEMPTS
+        && $attempt->last_attempt_at
+        && $attempt->last_attempt_at->gt(now()->subMinutes(self::LOCK_MINUTES));
+    }
+
+    private function recordFailedAttempt(string $username, string $ip): void
+    {
+        $attempt = $this->getAttempt($username);
+
+        if ($attempt->last_attempt_at && $attempt->last_attempt_at->lte(now()->subMinutes(self::LOCK_MINUTES))) {
+            $attempt->attempt_count = 0;
+        }
+
+        $attempt->ip_address      = $ip;
         $attempt->attempt_count   = ($attempt->attempt_count ?? 0) + 1;
         $attempt->last_attempt_at = now();
         $attempt->save();
-
-        if ($attempt->attempt_count >= self::MAX_ATTEMPTS) {
-            $user->password_expiry_at = now();
-            $user->save();
-        }
     }
-
-    private function resetAttempt(string $username, string $ip): void
+    private function resetAttempt(string $username): void
     {
-        LoginAttempt::where('username', $username)
-            ->where('ip_address', $ip)
-            ->delete();
+        LoginAttempt::where('username', $username)->delete();
     }
 
     private function loginViaAD(Users $user, string $password): array
@@ -121,16 +126,18 @@ class LoginController extends Controller
             'response' => ['message' => 'An error occurred', 'error' => []],
         ];
 
-        $ip   = $request->ip();
-        $user = Users::where('username', $request->username)->where('aktif', 1)->first();
+        $ip       = $request->ip();
+        $username = Str::limit(trim((string) $request->username), 50, '');
 
-        if (! $user) {
-            $data['response']['error'] = [['Username / Password salah.']];
+        if ($this->isLocked($this->getAttempt($username))) {
+            $data['response']['error'] = [['Terlalu banyak percobaan gagal. Coba lagi dalam ' . self::LOCK_MINUTES . ' menit atau hubungi admin.']];
             return $data;
         }
 
-        if ($user->tipe === 'AD') {
-            $result = $this->loginViaAD($user, $request->password);
+        $user = Users::where('username', $username)->where('aktif', 1)->first();
+
+        if ($user && $user->tipe === 'AD') {
+            $result = $this->loginViaAD($user, (string) $request->password);
 
             if (! $result['success']) {
                 $data['ad_error_type']     = $result['type'] ?? 'wrong_password';
@@ -138,36 +145,22 @@ class LoginController extends Controller
                 return $data;
             }
         } else {
-            $attempt = $this->getAttempt($user->username, $ip);
-
-            if (($attempt->attempt_count ?? 0) >= self::MAX_ATTEMPTS) {
-                $data['expired']           = true;
-                $data['user']              = $user;
-                $data['response']['error'] = [['Akun terkunci karena 3x salah password. Silahkan ganti password terlebih dahulu.']];
+            if (! $user || ! Hash::check((string) $request->password, $user->password)) {
+                $this->recordFailedAttempt($username, $ip);
+                $data['response']['error'] = [['Username / Password salah.']];
                 return $data;
             }
-
-            if (! Hash::check($request->password, $user->password)) {
-                $this->recordFailedAttempt($user, $ip);
-                $sisa = self::MAX_ATTEMPTS - (($attempt->attempt_count ?? 0) + 1);
-                $msg  = 'Username / Password salah.' . ($sisa > 0
-                        ? " Sisa percobaan: {$sisa}x."
-                        : ' Akun terkunci, silahkan ganti password.');
-                $data['response']['error'] = [[$msg]];
-                return $data;
-            }
-
-            $this->resetAttempt($user->username, $ip);
 
             if ($user->isPasswordExpired()) {
+                $this->resetAttempt($username);
+                $request->session()->put('pwd_change_user_id', $user->id);
                 $data['expired']           = true;
-                $data['user']              = $user;
                 $data['response']['error'] = [['Password anda sudah kadaluarsa. Silahkan ganti password.']];
                 return $data;
             }
         }
 
-        $this->resetAttempt($user->username, $ip);
+        $this->resetAttempt($username);
 
         $data['status']                       = true;
         $data['response']['data']['userinfo'] = [
@@ -216,12 +209,11 @@ class LoginController extends Controller
             ], 200);
         }
 
-        if (! empty($response['expired']) && ! empty($response['user'])) {
+        if (! empty($response['expired'])) {
             return new JsonResponse([
-                'status'   => false,
-                'expired'  => true,
-                'username' => $response['user']->username,
-                'message'  => $response['response']['error'],
+                'status'  => false,
+                'expired' => true,
+                'message' => $response['response']['error'],
             ], 200);
         }
 
@@ -238,35 +230,48 @@ class LoginController extends Controller
         return redirect('/login');
     }
 
+    private function passwordChangeUser(Request $request): ?Users
+    {
+        $id = $request->session()->get('pwd_change_user_id') ?? Session::get('userinfo.id');
+
+        return $id
+            ? Users::where('id', $id)->where('aktif', 1)->where('tipe', '!=', 'AD')->first()
+            : null;
+    }
+
     public function changePasswordForm(Request $request)
     {
+        $user = $this->passwordChangeUser($request);
 
-        $username = $request->query('username', Session::get('userinfo.username'));
+        if (! $user) {
+            return redirect('/login');
+        }
+
+        $username = $user->username;
         return view('auth.change_password', compact('username'));
     }
 
     public function changePassword(Request $request)
     {
+        $user = $this->passwordChangeUser($request);
+
+        if (! $user) {
+            return redirect('/login');
+        }
+
         $request->validate([
-            'username'                  => 'required',
-            'password_new'              => 'required|min:6|confirmed',
-            'password_new_confirmation' => 'required',
+            'password_new' => ['required', 'confirmed', Password::min(6)->mixedCase()->numbers()->symbols()],
         ], [
             'password_new.confirmed' => 'Konfirmasi password tidak cocok.',
-            'password_new.min'       => 'Password minimal 6 karakter.',
         ]);
-
-        $user = Users::where('username', $request->username)
-            ->where('aktif', 1)
-            ->where('tipe', '!=', 'AD')
-            ->firstOrFail();
 
         $user->password           = bcrypt($request->password_new);
         $user->password_expiry_at = now()->addDays(90);
-        $user->updated_by         = $request->username;
+        $user->updated_by         = $user->username;
         $user->save();
 
-        LoginAttempt::where('username', $user->username)->delete();
+        $this->resetAttempt($user->username);
+        $request->session()->forget('pwd_change_user_id');
 
         return redirect('/login')->with('message_success', 'Password berhasil diubah. Silahkan login kembali.');
     }

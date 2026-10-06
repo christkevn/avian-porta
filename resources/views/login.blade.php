@@ -177,9 +177,7 @@
                     }
 
                     if (response.expired) {
-                        let locked = response.locked ? '&locked=1' : '';
-                        window.location.href = routes.changePassword +
-                            "?username=" + encodeURIComponent(response.username) + locked;
+                        window.location.href = routes.changePassword;
                         return;
                     }
 

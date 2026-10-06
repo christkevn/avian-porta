@@ -64,11 +64,22 @@ if (!$isSuperAdmin && $userId) {
 
     <li class="menu-header">
         <span class="menu-header-text">Laporan</span>
+    </li>
+    <li class="menu-item <?= activemenu('master/reports') ?>">
         <a href="<?= url('master/reports') ?>" class="menu-link">
             <i class="menu-icon ri ri-file-list-3-line"></i>
-            <div>Laporan</div>
+            <div>Log Aktivitas</div>
+        </a>
+    </li>
+
+    <li class="menu-header">
+        <span class="menu-header-text">User Terkunci</span>
+    </li>
+    <li class="menu-item <?= activemenu('master/locked-users') ?>">
+        <a href="<?= url('master/locked-users') ?>" class="menu-link">
+            <i class="menu-icon ri ri-lock-line"></i>
+            <div>User Terkunci</div>
         </a>
     </li>
     <?php endif; ?>
-
 </ul>

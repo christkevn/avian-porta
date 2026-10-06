@@ -77,7 +77,8 @@ class UsersController extends Controller
 
         if ($request->filled('password')) {
             $data->password           = bcrypt($validated['password']);
-            $data->password_expiry_at = now()->addDays(90);
+            $data->password_expiry_at = now();
+            \App\Models\LoginAttempt::where('username', $data->username)->delete();
         }
 
         $data->save();

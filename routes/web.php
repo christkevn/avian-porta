@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LockedUserController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserMenuPermissionController;
 use App\Http\Controllers\UserProgramController;
 use App\Http\Controllers\UsersController;
@@ -31,11 +33,19 @@ Route::middleware('token_super_admin')
     ->prefix('master')
     ->name('master.')
     ->group(function () {
+        Route::match(['GET', 'POST'], '/login', [LoginController::class, 'index'])->middleware('throttle:20,1')->name('login');
+        Route::post('/change-password', [LoginController::class, 'changePassword'])->middleware('throttle:10,1')->name('change.password');
 
         // Users
         Route::get('/users/datatable', [UsersController::class, 'datatable'])->name('users.datatable');
         Route::post('/users/clear-filter', [UsersController::class, 'clearFilter'])->name('users.clearFilter');
         Route::resource('users', UsersController::class);
+
+        // Locked Users
+        Route::get('/locked-users', [LockedUserController::class, 'index'])->name('locked-users.index');
+        Route::get('/locked-users/datatable', [LockedUserController::class, 'datatable'])->name('locked-users.datatable');
+        Route::post('/locked-users/unlock', [LockedUserController::class, 'unlock'])->name('locked-users.unlock');
+        Route::post('/locked-users/reset-password', [LockedUserController::class, 'resetPassword'])->name('locked-users.reset-password');
 
         // Programs
         Route::get('/programs/datatable', [ProgramController::class, 'datatable'])->name('programs.datatable');
@@ -60,4 +70,8 @@ Route::middleware('token_super_admin')
             ->name('user-program-permissions.edit');
         Route::put('/user-program-permissions/{user_id}', [UserProgramController::class, 'update'])
             ->name('user-program-permissions.update');
+
+        // Reports
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/detail', [ReportController::class, 'detail'])->name('reports.detail');
     });
