@@ -28,8 +28,27 @@ class MenuController extends Controller
             ->addIndexColumn()
             ->addColumn('program_name', fn($row) => $row->program->name ?? '-')
             ->addColumn('action', function ($row) {
-                $edit   = '<a href="' . url("master/menus/{$row->id}/edit") . '" class="btn btn-sm btn-warning me-1" title="Edit"><i class="ri ri-edit-line"></i></a>';
-                $delete = '<button class="btn btn-sm btn-danger btn-delete" title="Hapus" data-id="' . $row->id . '" data-url="' . url("master/menus/{$row->id}") . '"><i class="ri ri-delete-bin-line"></i></button>';
+                $edit = '<a href="' . url("master/menus/{$row->id}/edit") . '"
+                        class="btn btn-sm btn-warning me-1"
+                        title="Edit">
+                        <i class="ri ri-edit-line"></i>
+                    </a>';
+
+                $delete = '
+                <form action="' . url("master/menus/{$row->id}") . '"
+                    method="POST"
+                    class="d-inline"
+                    onsubmit="return confirm(\'Yakin ingin menghapus menu ini?\')">
+                    ' . csrf_field() . '
+                    ' . method_field('DELETE') . '
+                    <button type="submit"
+                            class="btn btn-sm btn-danger"
+                            title="Hapus">
+                        <i class="ri ri-delete-bin-line"></i>
+                    </button>
+                </form>
+            ';
+
                 return $edit . $delete;
             })
             ->rawColumns(['action'])

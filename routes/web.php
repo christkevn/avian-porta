@@ -53,7 +53,8 @@ Route::middleware('token_super_admin')
 
         // Menus
         Route::get('/menus/datatable', [MenuController::class, 'datatable'])->name('menus.datatable');
-        Route::resource('menus', MenuController::class);
+        Route::resource('menus', MenuController::class)
+            ->except(['show']);
 
         // User Menu Permissions
         Route::get('/user-menu-permissions', [UserMenuPermissionController::class, 'index'])

@@ -12,7 +12,15 @@ class UserProgramController extends Controller
     {
         createLog('akses_menu', 'Permission Program');
         $users = Users::where('aktif', 1)->orderBy('nama')->get();
-        return view('permissions.program_index', compact('users'));
+
+        $userPrograms = UserProgram::join('programs', 'programs.id', '=', 'user_programs.program_id')
+            ->whereIn('user_programs.user_id', $users->pluck('id'))
+            ->orderBy('programs.name')
+            ->get(['user_programs.user_id', 'programs.name'])
+            ->groupBy('user_id')
+            ->map(fn($rows) => $rows->pluck('name')->toArray());
+
+        return view('permissions.program_index', compact('users', 'userPrograms'));
     }
 
     public function edit($user_id)
