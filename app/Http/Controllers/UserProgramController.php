@@ -8,10 +8,24 @@ use Illuminate\Http\Request;
 
 class UserProgramController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         createLog('akses_menu', 'Permission Program');
-        $users = Users::where('aktif', 1)->orderBy('nama')->get();
+        $key = 'perm_program_filter';
+        if ($request->boolean('clear')) {
+            session()->forget($key);
+            return redirect(url()->current());
+        }
+        if ($request->has('filter')) {
+            session([$key => ['level' => $request->input('level'), 'name' => $request->input('name')]]);
+            return redirect(url()->current());
+        }
+        $filter = session($key, []);
+        $levels = Users::where('aktif', 1)->whereNotNull('level')->distinct()->orderBy('level')->pluck('level');
+        $users  = Users::where('aktif', 1)
+            ->when(!empty($filter['level']), fn($q) => $q->where('level', $filter['level']))
+            ->when(!empty($filter['name']), fn($q) => $q->where('nama', 'like', '%' . $filter['name'] . '%'))
+            ->orderBy('nama')->get();
 
         $userPrograms = UserProgram::join('programs', 'programs.id', '=', 'user_programs.program_id')
             ->whereIn('user_programs.user_id', $users->pluck('id'))
@@ -20,7 +34,7 @@ class UserProgramController extends Controller
             ->groupBy('user_id')
             ->map(fn($rows) => $rows->pluck('name')->toArray());
 
-        return view('permissions.program_index', compact('users', 'userPrograms'));
+        return view('permissions.program_index', compact('users', 'userPrograms', 'levels', 'filter'));
     }
 
     public function edit($user_id)

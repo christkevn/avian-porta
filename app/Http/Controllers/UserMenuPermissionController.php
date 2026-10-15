@@ -8,11 +8,25 @@ use Illuminate\Http\Request;
 
 class UserMenuPermissionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         createLog('akses_menu', 'Permission Menu');
-        $users = Users::where('aktif', 1)->orderBy('nama')->get();
-        return view('permissions.menu_index', compact('users'));
+        $key = 'perm_menu_filter';
+        if ($request->boolean('clear')) {
+            session()->forget($key);
+            return redirect(url()->current());
+        }
+        if ($request->has('filter')) {
+            session([$key => ['level' => $request->input('level'), 'name' => $request->input('name')]]);
+            return redirect(url()->current());
+        }
+        $filter = session($key, []);
+        $levels = Users::where('aktif', 1)->whereNotNull('level')->distinct()->orderBy('level')->pluck('level');
+        $users  = Users::where('aktif', 1)
+            ->when(!empty($filter['level']), fn($q) => $q->where('level', $filter['level']))
+            ->when(!empty($filter['name']), fn($q) => $q->where('nama', 'like', '%' . $filter['name'] . '%'))
+            ->orderBy('nama')->get();
+        return view('permissions.menu_index', compact('users', 'levels', 'filter'));
     }
 
     public function edit($user_id)

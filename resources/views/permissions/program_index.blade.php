@@ -10,6 +10,7 @@
             <div class="card-datatable">
                 @include('partials.notification')
                 @include('partials.error')
+            @include('permissions._filter')
                 <div class="table-responsive p-2">
                     <table class="datatables-basic table table-bordered w-100">
                         <thead>
