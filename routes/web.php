@@ -38,6 +38,7 @@ Route::middleware('token_super_admin')
 
         // Users
         Route::get('/users/datatable', [UsersController::class, 'datatable'])->name('users.datatable');
+        Route::get('/users/export', [UsersController::class, 'export'])->name('users.export');
         Route::post('/users/clear-filter', [UsersController::class, 'clearFilter'])->name('users.clearFilter');
         Route::resource('users', UsersController::class);
 

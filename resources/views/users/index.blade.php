@@ -49,6 +49,9 @@
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">User</h5>
                 <small class="text-body-secondary float-end">
+                    <button type="button" id="btnExport" class="btn btn-success me-1">
+                        <i class="ri ri-file-excel-2-line"></i> Export
+                    </button>
                     <a href="<?= url('/master/users/create') ?>" class="btn btn-primary w-200">Tambah User</a>
                 </small>
             </div>
@@ -143,6 +146,14 @@
         $('#btnFilter').on('click', function(e) {
             e.preventDefault();
             table.ajax.reload();
+        });
+
+        $('#btnExport').on('click', function() {
+            var params = $.param({
+                level: $('#filter_level').val(),
+                name: $('#filter_name').val()
+            });
+            window.location.href = "{{ route('master.users.export') }}?" + params;
         });
 
         $('#btnClearFilter').on('click', function(e) {

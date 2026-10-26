@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Exports\UsersExport;
 use App\Http\Controllers\Controller;
 use App\Models\Users;
 use Illuminate\Http\Request;
@@ -111,9 +112,8 @@ class UsersController extends Controller
         return view('users.view', compact('data'));
     }
 
-    public function datatable(Request $request)
+    private function filteredQuery(Request $request)
     {
-
         $data  = Users::where('aktif', 1);
         $level = $request->get('level');
         $name  = $request->get('name');
@@ -125,6 +125,25 @@ class UsersController extends Controller
         if ($name) {
             $data->where('nama', 'like', '%' . $name . '%');
         }
+
+        return $data;
+    }
+
+    public function export(Request $request)
+    {
+        $users = $this->filteredQuery($request)
+            ->select('username', 'tipe', 'nama', 'email', 'level', 'cabang', 'aktif')
+            ->orderBy('username')
+            ->cursor();
+
+        createLog('export_user', 'Users', null, json_encode($request->only(['level', 'name'])));
+
+        return (new UsersExport($users))->download('users_' . now()->format('Ymd_His') . '.xlsx');
+    }
+
+    public function datatable(Request $request)
+    {
+        $data = $this->filteredQuery($request);
 
         return DataTables::of($data)
             ->editColumn('tipe', function ($row) {
