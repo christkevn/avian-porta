@@ -41,6 +41,12 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
+                        <label class="col-form-label">Log Data</label>
+                        <input type="text" name="db_log_table" class="form-control"
+                            value="{{ old('db_log_table', $data->db_log_table ?? 'log') }}" maxlength="100" required>
+
+                    </div>
+                    <div class="col-md-6 mb-3">
                         <label class="col-form-label">Foto Program</label>
                         <input type="file" name="photo" class="form-control" accept="image/*"
                             onchange="previewImage(this)">

@@ -47,10 +47,12 @@ class ProgramController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'        => 'required|unique:programs,name|max:100',
-            'url'         => 'required|max:100',
-            'db_database' => 'required|max:100',
-            'photo'       => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'name'         => 'required|unique:programs,name|max:100',
+            'url'          => 'required|max:100',
+            'db_database'  => 'required|max:100',
+            'photo'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'db_log_table' => ['required', 'max:100', 'regex:/^[A-Za-z0-9_]+$/'],
+
         ]);
 
         $photoPath = null;
@@ -59,11 +61,12 @@ class ProgramController extends Controller
         }
 
         $data = Program::create([
-            'name'        => $request->name,
-            'url'         => $request->url,
-            'db_database' => $request->db_database,
-            'photo_url'   => $photoPath,
-            'created_at'  => now(),
+            'name'         => $request->name,
+            'url'          => $request->url,
+            'db_database'  => $request->db_database,
+            'photo_url'    => $photoPath,
+            'db_log_table' => $request->db_log_table,
+            'created_at'   => now(),
         ]);
 
         createLog('create_program', 'program', null, $data->toJson());
@@ -84,10 +87,12 @@ class ProgramController extends Controller
         $dataInit = $data->toJson();
 
         $request->validate([
-            'name'        => 'required|unique:programs,name,' . $id . ',id|max:100',
-            'url'         => 'required|max:100',
-            'db_database' => 'required|max:100',
-            'photo'       => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'name'         => 'required|unique:programs,name,' . $id . ',id|max:100',
+            'url'          => 'required|max:100',
+            'db_database'  => 'required|max:100',
+            'photo'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'db_log_table' => ['required', 'max:100', 'regex:/^[A-Za-z0-9_]+$/'],
+
         ]);
 
         if ($request->hasFile('photo')) {
@@ -98,9 +103,10 @@ class ProgramController extends Controller
             $data->photo_url = $photoPath;
         }
 
-        $data->name        = $request->name;
-        $data->db_database = $request->db_database;
-        $data->url         = $request->url;
+        $data->name         = $request->name;
+        $data->db_database  = $request->db_database;
+        $data->url          = $request->url;
+        $data->db_log_table = $request->db_log_table;
         $data->save();
         createLog('update_program', 'program', $dataInit, $data->toJson());
         return redirect('/master/programs')->with('message', 'Program berhasil diperbarui.')->with('mode', 'success');

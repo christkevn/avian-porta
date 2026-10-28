@@ -33,7 +33,7 @@ class ReportController extends Controller
         foreach ($selected as $program) {
             try {
                 $result = DB::connection($this->connect($program))
-                    ->table('log')
+                    ->table($program->db_log_table ?: 'log')
                     ->selectRaw('menu, COUNT(*) AS total, MAX(created_at) AS terakhir')
                     ->whereBetween('created_at', [$from, $to])
                     ->groupBy('menu')
@@ -79,7 +79,7 @@ class ReportController extends Controller
             ->findOrFail($request->program_id);
 
         $actions = DB::connection($this->connect($program))
-            ->table('log')
+            ->table($program->db_log_table ?: 'log')
             ->selectRaw('log_name, COUNT(*) AS total, MAX(created_at) AS terakhir')
             ->where('menu', $request->menu)
             ->whereBetween('created_at', [$from, $to])

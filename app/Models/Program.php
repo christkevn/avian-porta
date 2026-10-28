@@ -14,6 +14,7 @@ class Program extends Model
         "photo_url",
         'created_at',
         'db_database',
+        'db_log_table',
     ];
 
     public $timestamps = false;
